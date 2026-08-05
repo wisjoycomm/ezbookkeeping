@@ -6,19 +6,19 @@
 
 ## Problem
 
-Logging a routine expense on mobile takes ~14 taps and four modal open/close cycles.
+Logging a routine expense on mobile takes 12 taps and four modal open/close cycles.
 Entering a 50,000 ₫ coffee today:
 
 1. tab-bar `+`
 2. amount row → opens `NumberPadSheet`
-3–7. five digits (VND amounts are 5–7 digits; there is no smaller denomination)
-8. confirm the pad
-9. category row → opens `TreeViewSelectionSheet`
-10. primary category
-11. secondary category (closes the sheet)
-12. account row → opens a selection sheet
-13. account
-14. save ✓ (small target, top-right of the navbar)
+3–5. three digits (`5`, `00`, `00` — the pad already has a `00` key for zero-fraction currencies)
+6. confirm the pad
+7. category row → opens `TreeViewSelectionSheet`
+8. primary category
+9. secondary category (closes the sheet)
+10. account row → opens a selection sheet
+11. account
+12. save ✓ (small target, top-right of the navbar)
 
 The cause is structural: `src/views/mobile/transactions/EditPage.vue` renders every field as an
 `f7-list-item` whose only behaviour is to open a sheet. Nothing is editable in place. The file is
@@ -31,30 +31,35 @@ form, so the category picker must handle every type and the user can pick the wr
 ## Goal
 
 Cut the *overhead* of logging a routine expense or income from 9 taps to 4, with spend and earn
-as distinct actions from the start.
+as distinct actions from the start. Total for a routine entry: 12 taps → 7.
 
-Digit entry is close to irreducible: the existing pad has only `0`–`9`, `× − +` and backspace, so
-50,000 ₫ costs 5 taps. The meaningful measure is everything that is *not* the amount — today
-that is 9 taps (open, four sheet open/close cycles, save), and this design targets 4
-(`+`, Chi tiêu, category chip, LƯU).
+Digit entry is nearly irreducible. The pad already has a `00` key: `NumberPadSheet.vue:62` renders
+it *instead of* the decimal separator when `supportDecimalSeparator` is false, backed by
+`inputDoubleNum()`. VND is `fraction: 0` (`src/consts/currency.ts:1182`), so VND users already get
+it, and 50,000 ₫ costs 3 taps (`5`, `00`, `00`).
+
+The meaningful measure is therefore everything that is *not* the amount — today that is 9 taps
+(open, four sheet open/close cycles, save), and this design targets 4 (`+`, Chi tiêu, category
+chip, LƯU).
 
 For the 50,000 ₫ coffee example, end to end:
 
-| | Today | Quick-add | Quick-add + `000` key |
-|---|---|---|---|
-| Overhead taps | 9 | 4 | 4 |
-| Amount taps | 5 | 5 | 3 |
-| **Total** | **14** | **9** | **7** |
-| Modal open/close cycles | 4 | 0 | 0 |
+| | Today | Quick-add |
+|---|---|---|
+| Overhead taps | 9 | 4 |
+| Amount taps | 3 | 3 |
+| **Total** | **12** | **7** |
+| Modal open/close cycles | 4 | 0 |
 
-**Approved addition — a `000` key.** VND has no denomination below 1,000, so nearly every amount
-ends in at least three zeros. Adding one key to `NumberPad` removes two taps from almost every
-entry, taking the coffee example to 7 taps total. It is additive for other currencies (an unused
-extra key) and benefits `NumberPadSheet`'s existing callers too.
+**Approved addition — a `000` key.** Marginal, and approved with that understood. Because `00`
+already exists, a `000` key saves exactly one tap, and only on 6–7 digit amounts: 7,500,000 ₫ goes
+from `7 5 00 00 0` (5 taps) to `7 5 000 00` (4). It does nothing for the coffee example. It is
+kept because it is a five-line change and VND rent and salary amounts are routinely seven digits.
 
-The key appends three zeros to the current value, subject to the same `TRANSACTION_MAX_AMOUNT`
-clamp as any other digit input, and is a no-op when the value is empty or zero (so it cannot
-produce a leading `000`).
+It shows under the same `v-if="!supportDecimalSeparator"` condition as the existing `00` key, so
+it appears only for zero-fraction currencies and never displaces the decimal separator. It appends
+three zeros via the existing `inputNum()` path, inheriting its `minValue`/`maxValue` clamping
+unchanged.
 
 **Definition of done**
 
@@ -117,7 +122,7 @@ inside `f7-sheet` in `NumberPadSheet.vue`, so it cannot be rendered inline witho
 │   1    2    3               │
 │   4    5    6               │   inline NumberPad
 │   7    8    9               │
-│  000   0    ⌫   (proposed)  │
+│  000  00  0  ⌫              │
 │                             │
 │  Chi tiết…      [   LƯU   ] │
 └─────────────────────────────┘
