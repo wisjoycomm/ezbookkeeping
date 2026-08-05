@@ -47,11 +47,14 @@ For the 50,000 ₫ coffee example, end to end:
 | **Total** | **14** | **9** | **7** |
 | Modal open/close cycles | 4 | 0 | 0 |
 
-**Proposed addition — a `000` key.** VND has no denomination below 1,000, so nearly every amount
+**Approved addition — a `000` key.** VND has no denomination below 1,000, so nearly every amount
 ends in at least three zeros. Adding one key to `NumberPad` removes two taps from almost every
-entry. It is additive for other currencies (an unused extra key) and benefits `NumberPadSheet`'s
-existing callers too. Listed here as a decision, not assumed: if rejected, the amount stays at
-5 taps and the design is otherwise unchanged.
+entry, taking the coffee example to 7 taps total. It is additive for other currencies (an unused
+extra key) and benefits `NumberPadSheet`'s existing callers too.
+
+The key appends three zeros to the current value, subject to the same `TRANSACTION_MAX_AMOUNT`
+clamp as any other digit input, and is a no-op when the value is empty or zero (so it cannot
+produce a leading `000`).
 
 **Definition of done**
 
