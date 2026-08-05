@@ -193,6 +193,11 @@
                                                               v-model="currentCalendarDate"></transaction-calendar>
                                     </v-card-text>
 
+                                    <v-card-text class="pt-0">
+                                        <quick-add-row @saved="reload(false, false)"
+                                                       @error="(message: string) => snackbar?.showError(message)"></quick-add-row>
+                                    </v-card-text>
+
                                     <v-table class="transaction-table" :hover="!loading" v-if="pageType !== TransactionListPageType.Gallery.type">
                                         <thead>
                                         <tr>
@@ -707,6 +712,7 @@ import { VMenu } from 'vuetify/components/VMenu';
 import PaginationButtons from '@/components/desktop/PaginationButtons.vue';
 import ConfirmDialog from '@/components/desktop/ConfirmDialog.vue';
 import SnackBar from '@/components/desktop/SnackBar.vue';
+import QuickAddRow from './list/QuickAddRow.vue';
 import EditDialog from './list/dialogs/EditDialog.vue';
 import AIImageRecognitionDialog from './list/dialogs/AIImageRecognitionDialog.vue';
 import ImportDialog from './import/ImportDialog.vue';
