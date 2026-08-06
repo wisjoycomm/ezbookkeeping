@@ -16,6 +16,9 @@
                 </f7-link>
             </f7-nav-title>
             <f7-nav-right :class="{ 'navbar-compact-icons': true, 'disabled': loading }">
+                <f7-link icon-f7="calendar" :class="{ 'tabbar-item-changed': showInlineCalendar }"
+                         v-if="pageType === TransactionListPageType.List.type"
+                         @click="showInlineCalendar = !showInlineCalendar"></f7-link>
                 <f7-link icon-f7="search" @click="toggleSearchbar"></f7-link>
                 <f7-link icon-f7="plus" :class="{ 'disabled': !canAddTransaction }" @click="add"></f7-link>
             </f7-nav-right>
@@ -39,7 +42,7 @@
                               :title="tt(type.name)"
                               :class="{ 'list-item-selected': pageType === type.type }"
                               :key="type.type"
-                              v-for="type in TransactionListPageType.values()"
+                              v-for="type in TransactionListPageType.selectableValues()"
                               @click="changePageType(type.type)">
                     <template #after>
                         <f7-icon class="list-item-checked-icon" f7="checkmark_alt" v-if="pageType === type.type"></f7-icon>
@@ -70,7 +73,7 @@
         </f7-toolbar>
 
         <f7-block class="transaction-calendar-container" :class="{ 'margin-vertical': showSearchbar, 'margin-vertical-half': !showSearchbar }"
-                  v-if="pageType === TransactionListPageType.Calendar.type">
+                  v-show="showInlineCalendar && pageType === TransactionListPageType.List.type">
             <transaction-calendar calendar-class="justify-content-center" week-day-name-type="short"
                                   :readonly="loading" :is-dark-mode="isDarkMode"
                                   :default-currency="false"
@@ -642,7 +645,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, nextTick, onMounted, onUnmounted } from 'vue';
+import { ref, computed, watch, nextTick, onMounted, onUnmounted } from 'vue';
 import type { Router } from 'framework7/types';
 
 import { useI18n } from '@/locales/helpers.ts';
@@ -660,6 +663,7 @@ import {
 import { TransactionListPageType, useTransactionListPageBase } from '@/views/base/transactions/TransactionListPageBase.ts';
 
 import { useEnvironmentsStore } from '@/stores/environment.ts';
+import { useSettingsStore } from '@/stores/setting.ts';
 import { useAccountsStore } from '@/stores/account.ts';
 import { useTransactionCategoriesStore } from '@/stores/transactionCategory.ts';
 import { useTransactionTagsStore } from '@/stores/transactionTag.ts';
@@ -701,6 +705,8 @@ import {
     getFullMonthDateRange,
     getValidMonthDayOrCurrentDayShortDate
 } from '@/lib/datetime.ts';
+import { DEFAULT_FINANCIAL_MONTH_START_DAY } from '@/core/financialperiod.ts';
+import { getFinancialPeriodFromUnixTime, getFinancialPeriodByOffset } from '@/lib/financialperiod.ts';
 import {
     categoryTypeToTransactionType,
     transactionTypeToCategoryType
@@ -780,6 +786,7 @@ const accountsStore = useAccountsStore();
 const transactionCategoriesStore = useTransactionCategoriesStore();
 const transactionTagsStore = useTransactionTagsStore();
 const transactionsStore = useTransactionsStore();
+const settingsStore = useSettingsStore();
 
 const loadingError = ref<unknown | null>(null);
 const loadingMore = ref<boolean>(false);
@@ -787,6 +794,7 @@ const transactionToDelete = ref<Transaction | null>(null);
 const transactionInvisibleYearMonths = ref<Record<TextualYearMonth, boolean>>({});
 const transactionYearMonthListHeights = ref<Record<TextualYearMonth, number>>({});
 const showSearchbar = ref<boolean>(false);
+const showInlineCalendar = ref<boolean>(false);
 const showCustomDateRangeSheet = ref<boolean>(false);
 const showCustomMonthSheet = ref<boolean>(false);
 const showDeleteActionSheet = ref<boolean>(false);
@@ -864,6 +872,33 @@ function getTransactionMonthListDomId(yearMonth: TextualYearMonth): string {
 function getTransactionDomId(transaction: Transaction): string {
     return 'transaction_' + transaction.id;
 }
+
+// Selecting a date scrolls the list to that day rather than filtering to it, so the surrounding
+// days stay visible. Rows carry a per-transaction id, so the target is the first loaded
+// transaction of that day.
+function scrollToCalendarDate(yearDashMonthDashDay: string): void {
+    for (const transactionMonthList of transactionsStore.transactions) {
+        for (const transaction of transactionMonthList.items) {
+            if (transaction.gregorianCalendarYearDashMonthDashDay === yearDashMonthDashDay) {
+                nextTick(() => {
+                    document.getElementById(getTransactionDomId(transaction))
+                        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
+                return;
+            }
+        }
+    }
+
+    showToast('No transactions on this day');
+}
+
+watch(currentCalendarDate, (newValue) => {
+    if (!showInlineCalendar.value || !newValue || pageType.value !== TransactionListPageType.List.type) {
+        return;
+    }
+
+    scrollToCalendarDate(newValue);
+});
 
 function isTransactionMonthListInvisible(transactionMonthList: TransactionMonthList): boolean {
     if (!transactionYearMonthListHeights.value[transactionMonthList.yearDashMonth]) {
@@ -1243,6 +1278,30 @@ function changeCustomMonthDateFilter(yearMonth: Year0BasedMonth): void {
 function shiftDateRange(minTime: number, maxTime: number, scale: number): void {
     if (query.value.dateType === DateRange.All.type) {
         return;
+    }
+
+    // With a custom financial month, stepping by one calendar month would drift away from the
+    // user's period boundaries, so step by financial period instead once the current range
+    // already matches one.
+    const startDay = settingsStore.appSettings.financialMonthStartDay;
+
+    if (startDay !== DEFAULT_FINANCIAL_MONTH_START_DAY) {
+        const currentPeriod = getFinancialPeriodFromUnixTime(minTime, startDay);
+
+        if (currentPeriod.minUnixTime === minTime && currentPeriod.maxUnixTime === maxTime) {
+            const targetPeriod = getFinancialPeriodByOffset(currentPeriod, scale, startDay);
+            const changed = transactionsStore.updateTransactionListFilter({
+                dateType: DateRange.Custom.type,
+                maxTime: targetPeriod.maxUnixTime,
+                minTime: targetPeriod.minUnixTime
+            });
+
+            if (changed) {
+                reload();
+            }
+
+            return;
+        }
     }
 
     let newDateRange: TimeRangeAndDateType | null = null;
