@@ -19,6 +19,7 @@ import {
     DEFAULT_RECONCILIATION_STATEMENT_DATE_RANGE_IN_MOBILE,
 } from './statistics.ts';
 import { DEFAULT_TRANSACTION_EXPLORER_DATE_RANGE } from './explorer.ts';
+import { DEFAULT_FINANCIAL_MONTH_START_DAY } from './financialperiod.ts';
 import { DEFAULT_CURRENCY_CODE } from '@/consts/currency.ts';
 
 export type ApplicationSettingKey = string;
@@ -36,6 +37,7 @@ export interface ApplicationSettings extends BaseApplicationSetting {
     theme: string;
     fontSize: number;
     timeZone: string;
+    financialMonthStartDay: number;
     autoUpdateExchangeRatesData: boolean;
     showAccountBalance: boolean;
     swipeBack: boolean;
@@ -132,6 +134,7 @@ export interface WebAuthnConfig {
 export const ALL_ALLOWED_CLOUD_SYNC_APP_SETTING_KEY_TYPES: Record<string, UserApplicationCloudSettingType> = {
     // Basic Settings
     'showAccountBalance': UserApplicationCloudSettingType.Boolean,
+    'financialMonthStartDay': UserApplicationCloudSettingType.Number,
     'autoUpdateExchangeRatesData': UserApplicationCloudSettingType.Boolean,
     // General Settings
     'chartColors': UserApplicationCloudSettingType.String,
@@ -198,6 +201,7 @@ export const DEFAULT_APPLICATION_SETTINGS: ApplicationSettings = {
     theme: 'auto',
     fontSize: 1,
     timeZone: '',
+    financialMonthStartDay: DEFAULT_FINANCIAL_MONTH_START_DAY,
     autoUpdateExchangeRatesData: true,
     showAccountBalance: true,
     swipeBack: true,

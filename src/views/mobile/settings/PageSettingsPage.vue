@@ -16,6 +16,30 @@
                     <div>{{ chartColorSchemeContent }}</div>
                 </template>
             </f7-list-item>
+
+            <f7-list-item
+                class="item-truncate-after-text"
+                link="#"
+                @click="showFinancialMonthStartDayPopup = true"
+            >
+                <template #after-title>
+                    <div class="item-actual-title">
+                        <span>{{ tt('Financial Month Starts On') }}</span>
+                    </div>
+                </template>
+                <template #after>
+                    {{ financialMonthStartDay }}
+                </template>
+                <list-item-selection-popup value-type="item"
+                                           key-field="type" value-field="type"
+                                           title-field="displayName"
+                                           :title="tt('Financial Month Starts On')"
+                                           :enable-filter="false"
+                                           :items="allFinancialMonthStartDays"
+                                           v-model:show="showFinancialMonthStartDayPopup"
+                                           v-model="financialMonthStartDay">
+                </list-item-selection-popup>
+            </f7-list-item>
         </f7-list>
 
         <f7-block-title>{{ tt('Overview Page') }}</f7-block-title>
@@ -396,6 +420,7 @@ const {
     hasAnyVisibleAccount,
     hasAnyTransactionCategory,
     allTimezoneTypesUsedForStatistics,
+    allFinancialMonthStartDays,
     allCurrencySortingTypes,
     allKeywordMatchModes,
     allAutoSaveTransactionDraftTypes,
@@ -403,6 +428,7 @@ const {
     allReconciliationStatementDateRanges,
     showAmountInHomePage,
     timezoneUsedForStatisticsInHomePage,
+    financialMonthStartDay,
     showTotalAmountInTransactionListPage,
     showTagInTransactionListPage,
     defaultKeywordMatchModeInTransactionListPage,
@@ -425,6 +451,7 @@ const accountsStore = useAccountsStore();
 const transactionCategoriesStore = useTransactionCategoriesStore();
 
 const showTimezoneUsedForStatisticsInHomePagePopup = ref<boolean>(false);
+const showFinancialMonthStartDayPopup = ref<boolean>(false);
 const showKeywordMatchModeInTransactionListPagePopup = ref<boolean>(false);
 const showQuickSaveButtonStyleInMobileTransactionListPagePopup = ref<boolean>(false);
 const showQuickAddButtonActionInMobileTransactionEditPagePopup = ref<boolean>(false);

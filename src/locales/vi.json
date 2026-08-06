@@ -2397,6 +2397,8 @@
     "Navigation Bar": "Navigation Bar",
     "Show Add Transaction Button": "Show Add Transaction Button",
     "Show Advanced Navigation": "Hiển thị điều hướng nâng cao",
+    "Financial Month Starts On": "Tháng tài chính bắt đầu vào ngày",
+    "Months shorter than the chosen day start on their final day": "Tháng ngắn hơn ngày đã chọn sẽ bắt đầu vào ngày cuối cùng của tháng",
     "More Details": "Chi tiết",
     "Quick Add": "Thêm nhanh",
     "Overview Page": "Trang tổng quan",

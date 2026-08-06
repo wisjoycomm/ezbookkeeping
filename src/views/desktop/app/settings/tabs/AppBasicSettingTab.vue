@@ -34,6 +34,20 @@
                             <v-col cols="12" md="6">
                                 <v-select
                                     item-title="displayName"
+                                    item-value="type"
+                                    persistent-placeholder
+                                    :label="tt('Financial Month Starts On')"
+                                    :placeholder="tt('Financial Month Starts On')"
+                                    :hint="tt('Months shorter than the chosen day start on their final day')"
+                                    :persistent-hint="true"
+                                    :items="allFinancialMonthStartDays"
+                                    v-model="financialMonthStartDay"
+                                />
+                            </v-col>
+
+                            <v-col cols="12" md="6">
+                                <v-select
+                                    item-title="displayName"
                                     item-value="value"
                                     persistent-placeholder
                                     :label="tt('Auto-update Exchange Rates Data')"
@@ -529,6 +543,8 @@ const {
     hasAnyVisibleAccount,
     hasAnyTransactionCategory,
     timeZone,
+    financialMonthStartDay,
+    allFinancialMonthStartDays,
     isAutoUpdateExchangeRatesData,
     showAccountBalance,
     showAmountInHomePage,

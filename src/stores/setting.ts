@@ -210,6 +210,12 @@ export const useSettingsStore = defineStore('settings', () => {
         updateUserApplicationCloudSettingValue('showAddTransactionButtonInDesktopNavbar', value);
     }
 
+    function setFinancialMonthStartDay(value: number): void {
+        updateApplicationSettingsValue('financialMonthStartDay', value);
+        appSettings.value.financialMonthStartDay = value;
+        updateUserApplicationCloudSettingValue('financialMonthStartDay', value);
+    }
+
     function setShowAdvancedNavigation(value: boolean): void {
         updateApplicationSettingsValue('showAdvancedNavigation', value);
         appSettings.value.showAdvancedNavigation = value;
@@ -596,6 +602,7 @@ export const useSettingsStore = defineStore('settings', () => {
         setTheme,
         setFontSize,
         setTimeZone,
+        setFinancialMonthStartDay,
         setAutoUpdateExchangeRatesData,
         setShowAccountBalance,
         setEnableSwipeBack,

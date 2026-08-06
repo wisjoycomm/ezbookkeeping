@@ -12,6 +12,7 @@ import { useStatisticsStore } from '@/stores/statistics.ts';
 
 import type { NameValue, TypeAndDisplayName } from '@/core/base.ts';
 import { DateRangeScene, DateRange } from '@/core/datetime.ts';
+import { MIN_FINANCIAL_MONTH_START_DAY, MAX_FINANCIAL_MONTH_START_DAY } from '@/core/financialperiod.ts';
 import type { LocalizedTimezoneInfo } from '@/core/timezone.ts';
 
 import { isObjectEmpty } from '@/lib/common.ts';
@@ -84,6 +85,28 @@ export function useAppSettingPageBase() {
             overviewStore.updateTransactionOverviewInvalidState(true);
             statisticsStore.updateTransactionStatisticsInvalidState(true);
         }
+    });
+
+    const financialMonthStartDay = computed<number>({
+        get: () => settingsStore.appSettings.financialMonthStartDay,
+        set: (value) => {
+            settingsStore.setFinancialMonthStartDay(value);
+            // The transaction list groups by financial period, so its loaded data is stale now.
+            transactionsStore.updateTransactionListInvalidState(true);
+        }
+    });
+
+    const allFinancialMonthStartDays = computed<TypeAndDisplayName[]>(() => {
+        const days: TypeAndDisplayName[] = [];
+
+        for (let day = MIN_FINANCIAL_MONTH_START_DAY; day <= MAX_FINANCIAL_MONTH_START_DAY; day++) {
+            days.push({
+                type: day,
+                displayName: day.toString()
+            });
+        }
+
+        return days;
     });
 
     const isAutoUpdateExchangeRatesData = computed<boolean>({
@@ -233,6 +256,8 @@ export function useAppSettingPageBase() {
         allImageUploadQualityTypes,
         allReconciliationStatementDateRanges,
         timeZone,
+        financialMonthStartDay,
+        allFinancialMonthStartDays,
         hasAnyAccount,
         hasAnyVisibleAccount,
         hasAnyTransactionCategory,
