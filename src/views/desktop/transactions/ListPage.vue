@@ -183,15 +183,26 @@
                                         </div>
                                     </v-card-text>
 
-                                    <v-card-text class="transaction-calendar-container pt-0" v-if="pageType === TransactionListPageType.Calendar.type">
-                                        <transaction-calendar day-has-transaction-class="font-weight-bold"
-                                                              :readonly="loading" :is-dark-mode="isDarkMode"
-                                                              :default-currency="selectedAccountDefaultCurrency"
-                                                              :min-date="transactionCalendarMinDate"
-                                                              :max-date="transactionCalendarMaxDate"
-                                                              :dailyTotalAmounts="currentMonthTransactionData?.dailyTotalAmounts"
-                                                              v-model="currentCalendarDate"></transaction-calendar>
+                                    <v-card-text class="pb-0" v-if="pageType === TransactionListPageType.List.type">
+                                        <v-btn variant="text" density="comfortable" color="default"
+                                               :prepend-icon="showInlineCalendar ? mdiChevronUp : mdiChevronDown"
+                                               @click="showInlineCalendar = !showInlineCalendar">
+                                            {{ tt('Calendar') }}
+                                        </v-btn>
                                     </v-card-text>
+
+                                    <v-expand-transition>
+                                        <v-card-text class="transaction-calendar-container pt-0"
+                                                     v-show="showInlineCalendar && pageType === TransactionListPageType.List.type">
+                                            <transaction-calendar day-has-transaction-class="font-weight-bold"
+                                                                  :readonly="loading" :is-dark-mode="isDarkMode"
+                                                                  :default-currency="selectedAccountDefaultCurrency"
+                                                                  :min-date="transactionCalendarMinDate"
+                                                                  :max-date="transactionCalendarMaxDate"
+                                                                  :dailyTotalAmounts="currentMonthTransactionData?.dailyTotalAmounts"
+                                                                  v-model="currentCalendarDate"></transaction-calendar>
+                                        </v-card-text>
+                                    </v-expand-transition>
 
                                     <v-card-text class="pt-0">
                                         <quick-add-row @saved="reload(false, false)"
@@ -545,6 +556,7 @@
                                                :class="{ 'disabled': loading, 'has-bottom-border': idx < transactions.length - 1 }"
                                                v-for="(transaction, idx) in transactions">
                                             <tr class="transaction-list-row-date no-hover text-sm"
+                                                :id="getTransactionDateRowDomId(transaction.gregorianCalendarYearDashMonthDashDay)"
                                                 v-if="pageType === TransactionListPageType.List.type && (idx === 0 || (idx > 0 && (transaction.gregorianCalendarYearDashMonthDashDay !== transactions[idx - 1]!.gregorianCalendarYearDashMonthDashDay)))">
                                                 <td :colspan="showTagInTransactionListPage ? 6 : 5" class="font-weight-bold">
                                                     <div class="d-flex align-center">
@@ -812,7 +824,9 @@ import {
     mdiPound,
     mdiMagicStaff,
     mdiTextBoxOutline,
-    mdiTextBoxEditOutline
+    mdiTextBoxEditOutline,
+    mdiChevronDown,
+    mdiChevronUp
 } from '@mdi/js';
 
 interface TransactionListProps {
@@ -929,6 +943,12 @@ const accountFilterMenu = useTemplateRef<VMenu>('accountFilterMenu');
 const tagFilterMenu = useTemplateRef<VMenu>('tagFilterMenu');
 
 const confirmDialog = useTemplateRef<ConfirmDialogType>('confirmDialog');
+const showInlineCalendar = ref<boolean>(false);
+
+function getTransactionDateRowDomId(yearDashMonthDashDay: string | undefined): string {
+    return `transaction-date-${yearDashMonthDashDay ?? ''}`;
+}
+
 const snackbar = useTemplateRef<SnackBarType>('snackbar');
 const editDialog = useTemplateRef<EditDialogType>('editDialog');
 const aiImageRecognitionDialog = useTemplateRef<AIImageRecognitionDialogType>('aiImageRecognitionDialog');
@@ -1863,6 +1883,25 @@ onBeforeRouteUpdate((to) => {
     } else {
         init({});
     }
+});
+
+// Selecting a date in the calendar scrolls the list to that day rather than filtering to it, so
+// the surrounding days stay visible. A date with no loaded transactions has no row to scroll to;
+// that is reported rather than silently doing nothing.
+watch(currentCalendarDate, (newValue) => {
+    if (!showInlineCalendar.value || !newValue || pageType.value !== TransactionListPageType.List.type) {
+        return;
+    }
+
+    nextTick(() => {
+        const element = document.getElementById(getTransactionDateRowDomId(newValue));
+
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+            snackbar.value?.showMessage('No transactions on this day');
+        }
+    });
 });
 
 watch(() => display.mdAndUp.value, (newValue) => {
