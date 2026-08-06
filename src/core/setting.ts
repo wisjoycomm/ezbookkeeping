@@ -47,6 +47,7 @@ export interface ApplicationSettings extends BaseApplicationSetting {
     chartColors: string;
     // Navigation Bar
     showAddTransactionButtonInDesktopNavbar: boolean;
+    showAdvancedNavigation: boolean;
     // Overview Page
     showAmountInHomePage: boolean;
     timezoneUsedForStatisticsInHomePage: number;
@@ -136,6 +137,7 @@ export const ALL_ALLOWED_CLOUD_SYNC_APP_SETTING_KEY_TYPES: Record<string, UserAp
     'chartColors': UserApplicationCloudSettingType.String,
     // Navigation Bar
     'showAddTransactionButtonInDesktopNavbar': UserApplicationCloudSettingType.Boolean,
+    'showAdvancedNavigation': UserApplicationCloudSettingType.Boolean,
     // Overview Page
     'showAmountInHomePage': UserApplicationCloudSettingType.Boolean,
     'timezoneUsedForStatisticsInHomePage': UserApplicationCloudSettingType.Number,
@@ -207,6 +209,7 @@ export const DEFAULT_APPLICATION_SETTINGS: ApplicationSettings = {
     chartColors: '',
     // Navigation Bar
     showAddTransactionButtonInDesktopNavbar: true,
+    showAdvancedNavigation: false,
     // Overview Page
     showAmountInHomePage: true,
     timezoneUsedForStatisticsInHomePage: TimezoneTypeForStatistics.Default.type,
