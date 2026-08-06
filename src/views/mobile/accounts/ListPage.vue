@@ -220,9 +220,11 @@
                               @password:confirm="clearAllTransactions">
         </password-input-sheet>
 
-        <main-tab-bar active="accounts"
-                      @saved="reload()"
-                      @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        <template #fixed>
+            <main-tab-bar active="accounts"
+                          @saved="reload()"
+                          @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        </template>
     </f7-page>
 </template>
 

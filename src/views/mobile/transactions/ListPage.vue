@@ -73,9 +73,11 @@
             </f7-link>
         </f7-toolbar>
 
-        <main-tab-bar active="transactions"
-                      @saved="reload()"
-                      @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        <template #fixed>
+            <main-tab-bar active="transactions"
+                          @saved="reload()"
+                          @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        </template>
 
         <f7-block class="transaction-calendar-container" :class="{ 'margin-vertical': showSearchbar, 'margin-vertical-half': !showSearchbar }"
                   v-show="showInlineCalendar && pageType === TransactionListPageType.List.type">

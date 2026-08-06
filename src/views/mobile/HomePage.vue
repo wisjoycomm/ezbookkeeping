@@ -163,9 +163,11 @@
             </f7-list-item>
         </f7-list>
 
-        <main-tab-bar @taphold="openTransactionTemplatePopover"
-                      @saved="reload()"
-                      @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        <template #fixed>
+            <main-tab-bar @taphold="openTransactionTemplatePopover"
+                          @saved="reload()"
+                          @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        </template>
 
         <f7-popover class="template-popover-menu" target-el="#homepage-add-button"
                     v-model:opened="showTransactionTemplatePopover">

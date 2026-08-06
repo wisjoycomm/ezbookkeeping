@@ -114,8 +114,10 @@
             <f7-list-item :title="tt('About')" link="/about" :after="version"></f7-list-item>
         </f7-list>
 
-        <main-tab-bar active="settings"
-                      @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        <template #fixed>
+            <main-tab-bar active="settings"
+                          @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        </template>
     </f7-page>
 </template>
 

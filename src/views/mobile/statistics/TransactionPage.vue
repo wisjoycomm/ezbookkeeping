@@ -388,9 +388,11 @@
             </f7-actions-group>
         </f7-actions>
 
-        <main-tab-bar active="statistics"
-                      @saved="reload()"
-                      @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        <template #fixed>
+            <main-tab-bar active="statistics"
+                          @saved="reload()"
+                          @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
+        </template>
     </f7-page>
 </template>
 
