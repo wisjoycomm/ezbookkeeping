@@ -9,12 +9,7 @@
              @page:afterin="onPageAfterIn"
              @infinite="loadMore(true)">
         <f7-navbar>
-            <f7-nav-title>
-                <f7-link popover-open=".chart-data-type-popover-menu" :class="{ 'disabled': loading }">
-                    <span style="color: var(--f7-text-color)">{{ displayPageTypeName }}</span>
-                    <f7-icon class="page-title-bar-icon" color="gray" style="opacity: 0.5" f7="chevron_down_circle_fill"></f7-icon>
-                </f7-link>
-            </f7-nav-title>
+            <f7-nav-title :title="displayPageTypeName"></f7-nav-title>
             <f7-nav-right :class="{ 'navbar-compact-icons': true, 'disabled': loading }">
                 <f7-link icon-f7="calendar" :class="{ 'tabbar-item-changed': showInlineCalendar }"
                          v-if="pageType === TransactionListPageType.List.type"
@@ -35,21 +30,6 @@
                 ></f7-searchbar>
             </f7-subnavbar>
         </f7-navbar>
-
-        <f7-popover class="chart-data-type-popover-menu">
-            <f7-list dividers>
-                <f7-list-item link="#" no-chevron popover-close
-                              :title="tt(type.name)"
-                              :class="{ 'list-item-selected': pageType === type.type }"
-                              :key="type.type"
-                              v-for="type in TransactionListPageType.selectableValues()"
-                              @click="changePageType(type.type)">
-                    <template #after>
-                        <f7-icon class="list-item-checked-icon" f7="checkmark_alt" v-if="pageType === type.type"></f7-icon>
-                    </template>
-                </f7-list-item>
-            </f7-list>
-        </f7-popover>
 
         <f7-toolbar tabbar bottom class="compact-tabbar toolbar-item-auto-size transaction-list-toolbar">
             <f7-link :class="{ 'disabled': loading || query.dateType === DateRange.All.type }" @click="shiftDateRange(query.minTime, query.maxTime, -1)">
@@ -1153,30 +1133,6 @@ function loadMore(autoExpand: boolean): void {
             showToast(error.message || error);
         }
     });
-}
-
-function changePageType(type: number): void {
-    pageType.value = type;
-    currentCalendarDate.value = getValidMonthDayOrCurrentDayShortDate(query.value.minTime, currentCalendarDate.value);
-
-    if (pageType.value === TransactionListPageType.Calendar.type) {
-        const dateRange = getFullMonthDateRange(query.value.minTime, query.value.maxTime, firstDayOfWeek.value, fiscalYearStart.value);
-
-        if (dateRange) {
-            const changed = transactionsStore.updateTransactionListFilter({
-                dateType: dateRange.dateType,
-                maxTime: dateRange.maxTime,
-                minTime: dateRange.minTime
-            });
-
-            if (changed) {
-                currentCalendarDate.value = getValidMonthDayOrCurrentDayShortDate(query.value.minTime, currentCalendarDate.value);
-                reload();
-            }
-        }
-    } else {
-        reload();
-    }
 }
 
 function changeDateFilter(dateType: number): void {

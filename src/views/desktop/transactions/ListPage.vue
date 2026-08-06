@@ -4,15 +4,6 @@
             <v-card>
                 <v-layout>
                     <v-navigation-drawer :permanent="alwaysShowNav" v-model="showNav">
-                        <div class="mx-6 my-4">
-                            <btn-vertical-group :disabled="loading" :buttons="TransactionListPageType.selectableValues().map(item => {
-                                return {
-                                    name: tt(item.name),
-                                    value: item.type
-                                }
-                            })" v-model="queryPageType" />
-                        </div>
-                        <v-divider />
                         <div class="mx-6 mt-4">
                             <span class="text-subtitle-2">{{ tt('Transaction Type') }}</span>
                             <v-select
@@ -1110,11 +1101,6 @@ const recentDateRangeIndex = computed<number>({
     }
 });
 
-const queryPageType = computed<number>({
-    get: () => pageType.value,
-    set: (value) => changePageType(value)
-});
-
 const queryType = computed<number>({
     get: () => query.value.type,
     set: (value) => changeTypeFilter(value)
@@ -1391,26 +1377,6 @@ function reload(force: boolean, init: boolean): void {
             snackbar.value?.showError(error);
         }
     });
-}
-
-function changePageType(type: number): void {
-    pageType.value = type;
-    currentCalendarDate.value = getValidMonthDayOrCurrentDayShortDate(query.value.minTime, currentCalendarDate.value);
-
-    if (pageType.value === TransactionListPageType.Calendar.type) {
-        const dateRange = getFullMonthDateRange(query.value.minTime, query.value.maxTime, firstDayOfWeek.value, fiscalYearStart.value);
-
-        if (dateRange) {
-            transactionsStore.updateTransactionListFilter({
-                dateType: dateRange.dateType,
-                maxTime: dateRange.maxTime,
-                minTime: dateRange.minTime
-            });
-            currentCalendarDate.value = getValidMonthDayOrCurrentDayShortDate(query.value.minTime, currentCalendarDate.value);
-        }
-    }
-
-    updateUrlWhenChanged(true);
 }
 
 function changeDateFilter(dateRange: TimeRangeAndDateType | number | null): void {
