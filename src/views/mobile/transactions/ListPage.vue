@@ -9,7 +9,6 @@
              @page:afterin="onPageAfterIn"
              @infinite="loadMore(true)">
         <f7-navbar>
-            <f7-nav-left :class="{ 'disabled': loading }" :back-link="tt('Back')"></f7-nav-left>
             <f7-nav-title>
                 <f7-link popover-open=".chart-data-type-popover-menu" :class="{ 'disabled': loading }">
                     <span style="color: var(--f7-text-color)">{{ displayPageTypeName }}</span>

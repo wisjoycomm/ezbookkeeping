@@ -1,7 +1,6 @@
 <template>
     <f7-page ptr class="page-with-two-bottom-bars" @ptr:refresh="reload" @page:afterin="onPageAfterIn">
         <f7-navbar>
-            <f7-nav-left :class="{ 'disabled': loading }" :back-link="tt('Back')"></f7-nav-left>
             <f7-nav-title>
                 <f7-link popover-open=".chart-data-type-popover-menu" :class="{ 'disabled': loading }">
                     <span class="statistics-page-title">{{ queryChartDataTypeName }}</span>
