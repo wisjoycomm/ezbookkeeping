@@ -205,7 +205,7 @@ export const DEFAULT_APPLICATION_SETTINGS: ApplicationSettings = {
     autoUpdateExchangeRatesData: true,
     showAccountBalance: true,
     swipeBack: true,
-    animate: true,
+    animate: false,
     // Application Lock
     applicationLock: false,
     applicationLockWebAuthn: false,
