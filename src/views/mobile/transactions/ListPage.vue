@@ -1032,6 +1032,12 @@ function init(): void {
         };
     }
 
+    // This page is a tab destination, so a fresh component mounts on every tab switch and init()
+    // runs again. Reloading unconditionally meant a network round trip and a full re-render of the
+    // list each time, even when nothing had changed. Reload only when the filter actually differs,
+    // the store data is stale, or there is nothing loaded yet.
+    const previousFilter = JSON.stringify(transactionsStore.transactionsFilter);
+
     transactionsStore.initTransactionListFilter({
         dateType: dateRange ? dateRange.dateType : undefined,
         maxTime: dateRange ? dateRange.maxTime : undefined,
@@ -1044,7 +1050,13 @@ function init(): void {
         matchMode: initQuery['matchMode'] && parseInt(initQuery['matchMode']) >= 0 ? parseInt(initQuery['matchMode']) : undefined
     });
 
-    reload();
+    const filterChanged = JSON.stringify(transactionsStore.transactionsFilter) !== previousFilter;
+
+    if (filterChanged || transactionsStore.transactionListStateInvalid || !transactionsStore.transactions.length) {
+        reload();
+    } else {
+        loading.value = false;
+    }
 }
 
 function reload(done?: () => void): void {
