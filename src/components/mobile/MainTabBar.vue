@@ -1,10 +1,10 @@
 <template>
     <f7-toolbar tabbar icons bottom class="main-tabbar">
-        <f7-link class="link" :class="{ 'tab-link-active': active === 'transactions' }" href="/transaction/list">
+        <f7-link class="link" :class="{ 'tab-link-active': active === 'transactions' }" reload-all href="/transaction/list">
             <f7-icon f7="square_list"></f7-icon>
             <span class="tabbar-label">{{ tt('Details') }}</span>
         </f7-link>
-        <f7-link class="link" :class="{ 'tab-link-active': active === 'accounts' }" href="/account/list">
+        <f7-link class="link" :class="{ 'tab-link-active': active === 'accounts' }" reload-all href="/account/list">
             <f7-icon f7="creditcard"></f7-icon>
             <span class="tabbar-label">{{ tt('Accounts') }}</span>
         </f7-link>
@@ -13,11 +13,11 @@
                  @click="showQuickAddTypeActions = true" @taphold="emit('taphold')">
             <f7-icon f7="plus_square" class="ebk-tarbar-big-icon"></f7-icon>
         </f7-link>
-        <f7-link class="link" :class="{ 'tab-link-active': active === 'statistics' }" href="/statistic/transaction">
+        <f7-link class="link" :class="{ 'tab-link-active': active === 'statistics' }" reload-all href="/statistic/transaction">
             <f7-icon f7="chart_pie"></f7-icon>
             <span class="tabbar-label">{{ tt('Statistics') }}</span>
         </f7-link>
-        <f7-link class="link" :class="{ 'tab-link-active': active === 'settings' }" href="/settings">
+        <f7-link class="link" :class="{ 'tab-link-active': active === 'settings' }" reload-all href="/settings">
             <f7-icon f7="gear_alt"></f7-icon>
             <span class="tabbar-label">{{ tt('Settings') }}</span>
         </f7-link>
