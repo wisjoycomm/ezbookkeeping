@@ -44,7 +44,7 @@
                         <span class="nav-item-title">{{ tt('Statistics & Analysis') }}</span>
                     </router-link>
                 </li>
-                <li class="nav-link">
+                <li class="nav-link" v-if="showAdvancedNavigation">
                     <router-link to="/insights/explorer">
                         <v-icon class="nav-item-icon" :icon="mdiCompassOutline"/>
                         <span class="nav-item-title">{{ tt('Insights Explorer') }}</span>
@@ -61,48 +61,48 @@
                         <span class="nav-item-title">{{ tt('Accounts') }}</span>
                     </router-link>
                 </li>
-                <li class="nav-link">
+                <li class="nav-link" v-if="showAdvancedNavigation">
                     <router-link to="/category/list">
                         <v-icon class="nav-item-icon" :icon="mdiViewDashboardOutline"/>
                         <span class="nav-item-title">{{ tt('Transaction Categories') }}</span>
                     </router-link>
                 </li>
-                <li class="nav-link">
+                <li class="nav-link" v-if="showAdvancedNavigation">
                     <router-link to="/tag/list">
                         <v-icon class="nav-item-icon" :icon="mdiTagOutline"/>
                         <span class="nav-item-title">{{ tt('Transaction Tags') }}</span>
                     </router-link>
                 </li>
-                <li class="nav-link">
+                <li class="nav-link" v-if="showAdvancedNavigation">
                     <router-link to="/template/list">
                         <v-icon class="nav-item-icon" :icon="mdiClipboardTextOutline"/>
                         <span class="nav-item-title">{{ tt('Transaction Templates') }}</span>
                     </router-link>
                 </li>
-                <li class="nav-link" v-if="isUserScheduledTransactionEnabled()">
+                <li class="nav-link" v-if="showAdvancedNavigation && isUserScheduledTransactionEnabled()">
                     <router-link to="/schedule/list">
                         <v-icon class="nav-item-icon" :icon="mdiClipboardTextClockOutline"/>
                         <span class="nav-item-title">{{ tt('Scheduled Transactions') }}</span>
                     </router-link>
                 </li>
-                <li class="nav-section-title">
+                <li class="nav-section-title" v-if="showAdvancedNavigation">
                     <div class="title-wrapper">
                         <span class="title-text">{{ tt('Miscellaneous') }}</span>
                     </div>
                 </li>
-                <li class="nav-link">
+                <li class="nav-link" v-if="showAdvancedNavigation">
                     <router-link to="/exchange_rates">
                         <v-icon class="nav-item-icon" :icon="mdiSwapHorizontal"/>
                         <span class="nav-item-title">{{ tt('Exchange Rates Data') }}</span>
                     </router-link>
                 </li>
-                <li class="nav-link">
+                <li class="nav-link" v-if="showAdvancedNavigation">
                     <a href="javascript:void(0);" @click="showMobileQrCode = true">
                         <v-icon class="nav-item-icon" :icon="mdiCellphone"/>
                         <span class="nav-item-title">{{ tt('Use on Mobile Device') }}</span>
                     </a>
                 </li>
-                <li class="nav-link">
+                <li class="nav-link" v-if="showAdvancedNavigation">
                     <router-link to="/about">
                         <v-icon class="nav-item-icon" :icon="mdiInformationOutline"/>
                         <span class="nav-item-title">{{ tt('About') }}</span>
@@ -297,6 +297,7 @@ const currentTheme = computed<string>({
 });
 
 const showAddTransactionButtonInDesktopNavbar = computed<boolean>(() => settingsStore.appSettings.showAddTransactionButtonInDesktopNavbar);
+const showAdvancedNavigation = computed<boolean>(() => settingsStore.appSettings.showAdvancedNavigation);
 const isEnableApplicationLock = computed<boolean>(() => settingsStore.appSettings.applicationLock);
 
 function handleNavScroll(e: Event): void {
