@@ -219,12 +219,18 @@
                               v-model="currentPasswordForClearData"
                               @password:confirm="clearAllTransactions">
         </password-input-sheet>
+
+        <main-tab-bar active="accounts"
+                      @saved="reload()"
+                      @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
     </f7-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import type { Router } from 'framework7/types';
+
+import MainTabBar from '@/components/mobile/MainTabBar.vue';
 
 import { useI18n } from '@/locales/helpers.ts';
 import { useI18nUIComponents, showLoading, hideLoading } from '@/lib/ui/mobile.ts';

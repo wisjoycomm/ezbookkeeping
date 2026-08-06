@@ -1,5 +1,6 @@
 <template>
     <f7-page ptr
+             class="page-with-two-bottom-bars"
              infinite
              :infinite-preloader="loadingMore"
              :infinite-distance="600"
@@ -71,6 +72,10 @@
                 <f7-icon f7="ellipsis_vertical" :class="{ 'tabbar-item-changed': query.type > 0 || query.amountFilter || query.tagFilter }"></f7-icon>
             </f7-link>
         </f7-toolbar>
+
+        <main-tab-bar active="transactions"
+                      @saved="reload()"
+                      @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
 
         <f7-block class="transaction-calendar-container" :class="{ 'margin-vertical': showSearchbar, 'margin-vertical-half': !showSearchbar }"
                   v-show="showInlineCalendar && pageType === TransactionListPageType.List.type">
@@ -661,6 +666,8 @@ import {
     onInfiniteScrolling
 } from '@/lib/ui/mobile.ts';
 import { TransactionListPageType, useTransactionListPageBase } from '@/views/base/transactions/TransactionListPageBase.ts';
+
+import MainTabBar from '@/components/mobile/MainTabBar.vue';
 
 import { useEnvironmentsStore } from '@/stores/environment.ts';
 import { useSettingsStore } from '@/stores/setting.ts';
@@ -1617,6 +1624,18 @@ init();
 <style>
 .transaction-list-toolbar .toolbar-inner {
     padding-inline-end: 8px;
+}
+
+/* This page carries two bottom bars: the filter toolbar and the main section tabbar. Framework7
+   pins both to the bottom, so the filter toolbar is lifted clear of the tabbar and the page
+   content is padded for both. Without this the two overlap and the last rows sit underneath. */
+.transaction-list-toolbar.toolbar-bottom,
+.transaction-list-toolbar {
+    bottom: calc(var(--f7-tabbar-height, 50px) + var(--f7-safe-area-bottom, 0px));
+}
+
+.page-with-two-bottom-bars .page-content {
+    padding-bottom: calc(var(--f7-tabbar-height, 50px) * 2 + var(--f7-safe-area-bottom, 0px));
 }
 
 .list.transaction-amount-list .transaction-amount-statistics {

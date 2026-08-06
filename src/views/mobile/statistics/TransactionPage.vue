@@ -1,5 +1,5 @@
 <template>
-    <f7-page ptr @ptr:refresh="reload" @page:afterin="onPageAfterIn">
+    <f7-page ptr class="page-with-two-bottom-bars" @ptr:refresh="reload" @page:afterin="onPageAfterIn">
         <f7-navbar>
             <f7-nav-left :class="{ 'disabled': loading }" :back-link="tt('Back')"></f7-nav-left>
             <f7-nav-title>
@@ -280,7 +280,7 @@
             </f7-list>
         </f7-popover>
 
-        <f7-toolbar tabbar bottom :class="{ 'compact-tabbar': true, 'toolbar-item-auto-size': true, 'disabled': loading }">
+        <f7-toolbar tabbar bottom class="statistics-filter-toolbar" :class="{ 'compact-tabbar': true, 'toolbar-item-auto-size': true, 'disabled': loading }">
             <f7-link :class="{ 'disabled': reloading || !canShiftDateRange }" @click="shiftDateRange(-1)">
                 <f7-icon class="icon-with-direction" f7="arrow_left_square"></f7-icon>
             </f7-link>
@@ -387,12 +387,18 @@
                 <f7-actions-button bold close>{{ tt('Cancel') }}</f7-actions-button>
             </f7-actions-group>
         </f7-actions>
+
+        <main-tab-bar active="statistics"
+                      @saved="reload()"
+                      @more-details="(query: string) => f7router.navigate(query ? `/transaction/add?${query}` : '/transaction/add')"></main-tab-bar>
     </f7-page>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import type { Router } from 'framework7/types';
+
+import MainTabBar from '@/components/mobile/MainTabBar.vue';
 
 import { useI18n } from '@/locales/helpers.ts';
 import { useStatisticsTransactionPageBase } from '@/views/base/statistics/StatisticsTransactionPageBase.ts';
@@ -897,6 +903,13 @@ init();
 </script>
 
 <style>
+/* Two bottom bars on this page: the filter toolbar and the main section tabbar. Lift the filter
+   toolbar clear of the tabbar so they do not overlap. */
+.statistics-filter-toolbar.toolbar-bottom,
+.statistics-filter-toolbar {
+    bottom: calc(var(--f7-tabbar-height, 50px) + var(--f7-safe-area-bottom, 0px));
+}
+
 .statistics-page-title {
     overflow: hidden;
     text-overflow: ellipsis;
