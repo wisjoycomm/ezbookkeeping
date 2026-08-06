@@ -184,11 +184,22 @@
                                     </v-card-text>
 
                                     <v-card-text class="pb-0" v-if="pageType === TransactionListPageType.List.type">
-                                        <v-btn variant="text" density="comfortable" color="default"
-                                               :prepend-icon="showInlineCalendar ? mdiChevronUp : mdiChevronDown"
-                                               @click="showInlineCalendar = !showInlineCalendar">
-                                            {{ tt('Calendar') }}
-                                        </v-btn>
+                                        <div class="d-flex align-center flex-wrap ga-1">
+                                            <v-btn variant="text" density="comfortable" color="default"
+                                                   :disabled="loading" :icon="mdiChevronLeft"
+                                                   :title="tt('Previous Period')"
+                                                   @click="moveFinancialPeriod(-1)"></v-btn>
+                                            <span class="text-subtitle-1 font-weight-medium">{{ currentDateRangeLabel }}</span>
+                                            <v-btn variant="text" density="comfortable" color="default"
+                                                   :disabled="loading" :icon="mdiChevronRight"
+                                                   :title="tt('Next Period')"
+                                                   @click="moveFinancialPeriod(1)"></v-btn>
+                                            <v-btn class="ms-2" variant="text" density="comfortable" color="default"
+                                                   :prepend-icon="showInlineCalendar ? mdiChevronUp : mdiChevronDown"
+                                                   @click="showInlineCalendar = !showInlineCalendar">
+                                                {{ tt('Calendar') }}
+                                            </v-btn>
+                                        </div>
                                     </v-card-text>
 
                                     <v-expand-transition>
@@ -794,6 +805,7 @@ import {
     getFullMonthDateRange,
     getValidMonthDayOrCurrentDayShortDate
 } from '@/lib/datetime.ts';
+import { getFinancialPeriodFromUnixTime, getFinancialPeriodByOffset } from '@/lib/financialperiod.ts';
 import {
     categoryTypeToTransactionType,
     transactionTypeToCategoryType
@@ -826,7 +838,9 @@ import {
     mdiTextBoxOutline,
     mdiTextBoxEditOutline,
     mdiChevronDown,
-    mdiChevronUp
+    mdiChevronUp,
+    mdiChevronLeft,
+    mdiChevronRight
 } from '@mdi/js';
 
 interface TransactionListProps {
@@ -868,6 +882,7 @@ const {
     tt,
     getAllRecentMonthDateRanges,
     getWeekdayLongName,
+    formatDateRange,
     formatNumberToLocalizedNumerals
 } = useI18n();
 
@@ -947,6 +962,31 @@ const showInlineCalendar = ref<boolean>(false);
 
 function getTransactionDateRowDomId(yearDashMonthDashDay: string | undefined): string {
     return `transaction-date-${yearDashMonthDashDay ?? ''}`;
+}
+
+// The label always describes the range actually being filtered, never an assumed period —
+// otherwise it would misreport whenever the filter is something like "Last 7 days".
+const currentDateRangeLabel = computed<string>(() => {
+    if (!query.value.minTime || !query.value.maxTime) {
+        return tt('All Time');
+    }
+
+    return formatDateRange(query.value.dateType, query.value.minTime, query.value.maxTime);
+});
+
+// Previous/next step by one financial period, whose length comes from the user's chosen
+// financial-month start day. Applied as a custom range through the existing date-filter path.
+function moveFinancialPeriod(offset: number): void {
+    const startDay = settingsStore.appSettings.financialMonthStartDay;
+    const anchorTime = query.value.minTime || getCurrentUnixTime();
+    const currentPeriod = getFinancialPeriodFromUnixTime(anchorTime, startDay);
+    const targetPeriod = getFinancialPeriodByOffset(currentPeriod, offset, startDay);
+
+    changeDateFilter({
+        dateType: DateRange.Custom.type,
+        minTime: targetPeriod.minUnixTime,
+        maxTime: targetPeriod.maxUnixTime
+    });
 }
 
 const snackbar = useTemplateRef<SnackBarType>('snackbar');
