@@ -210,6 +210,12 @@ export const useSettingsStore = defineStore('settings', () => {
         updateUserApplicationCloudSettingValue('showAddTransactionButtonInDesktopNavbar', value);
     }
 
+    function setShowAdvancedNavigation(value: boolean): void {
+        updateApplicationSettingsValue('showAdvancedNavigation', value);
+        appSettings.value.showAdvancedNavigation = value;
+        updateUserApplicationCloudSettingValue('showAdvancedNavigation', value);
+    }
+
     // Overview Page
     function setShowAmountInHomePage(value: boolean): void {
         updateApplicationSettingsValue('showAmountInHomePage', value);
@@ -601,6 +607,7 @@ export const useSettingsStore = defineStore('settings', () => {
         setChartColors,
         // -- Navigation Bar
         setShowAddTransactionButtonInDesktopNavbar,
+        setShowAdvancedNavigation,
         // -- Overview Page
         setShowAmountInHomePage,
         setTimezoneUsedForStatisticsInHomePage,
