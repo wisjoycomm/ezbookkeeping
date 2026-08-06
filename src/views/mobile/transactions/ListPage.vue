@@ -889,7 +889,9 @@ function scrollToCalendarDate(yearDashMonthDashDay: string): void {
         }
     }
 
-    showToast('No transactions on this day');
+    // When the range is one calendar month the whole month is loaded, so an absent row really
+    // means an empty day. Otherwise the list is paged and the day may just not be loaded yet.
+    showToast(queryMonthlyData.value ? 'No transactions on this day' : 'This day is not loaded yet, load more transactions first');
 }
 
 watch(currentCalendarDate, (newValue) => {

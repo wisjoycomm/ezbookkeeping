@@ -1938,8 +1938,13 @@ watch(currentCalendarDate, (newValue) => {
 
         if (element) {
             element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        } else {
+        } else if (queryMonthlyData.value) {
+            // The whole month is loaded in this mode, so an absent row really means an empty day.
             snackbar.value?.showMessage('No transactions on this day');
+        } else {
+            // The range spans more than one calendar month, so it is paged and the day may simply
+            // not be loaded yet. Saying "no transactions" here would be a lie.
+            snackbar.value?.showMessage('This day is not loaded yet, load more transactions first');
         }
     });
 });
