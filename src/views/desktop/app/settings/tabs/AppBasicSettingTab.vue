@@ -98,6 +98,18 @@
                                     v-model="showAddTransactionButtonInDesktopNavbar"
                                 />
                             </v-col>
+
+                            <v-col cols="12" md="6">
+                                <v-select
+                                    item-title="displayName"
+                                    item-value="value"
+                                    persistent-placeholder
+                                    :label="tt('Show Advanced Navigation')"
+                                    :placeholder="tt('Show Advanced Navigation')"
+                                    :items="enableDisableOptions"
+                                    v-model="showAdvancedNavigation"
+                                />
+                            </v-col>
                         </v-row>
                     </v-card-text>
                 </v-form>
@@ -573,6 +585,11 @@ const currentTheme = computed<string>({
 const showAddTransactionButtonInDesktopNavbar = computed<boolean>({
     get: () => settingsStore.appSettings.showAddTransactionButtonInDesktopNavbar,
     set: (value) => settingsStore.setShowAddTransactionButtonInDesktopNavbar(value)
+});
+
+const showAdvancedNavigation = computed<boolean>({
+    get: () => settingsStore.appSettings.showAdvancedNavigation,
+    set: (value) => settingsStore.setShowAdvancedNavigation(value)
 });
 
 const rememberLastSelectedFileTypeInImportTransactionDialog = computed<boolean>({
