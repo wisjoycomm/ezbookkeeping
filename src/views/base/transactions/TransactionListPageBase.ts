@@ -52,18 +52,23 @@ export class TransactionListPageType implements TypeAndName {
     private static readonly allInstances: TransactionListPageType[] = [];
     private static readonly allInstancesByType: Record<number, TransactionListPageType> = {};
 
-    public static readonly List = new TransactionListPageType(0, 'Transaction List');
-    public static readonly Calendar = new TransactionListPageType(1, 'Transaction Calendar');
-    public static readonly Gallery = new TransactionListPageType(2, 'Transaction Gallery');
+    public static readonly List = new TransactionListPageType(0, 'Transaction List', true);
+    // Calendar is absorbed into the list and Gallery is retired, so neither is offered in the
+    // mode selector any more. They stay defined so existing bookmarks still resolve — see
+    // resolveSelectable(), which redirects them to List.
+    public static readonly Calendar = new TransactionListPageType(1, 'Transaction Calendar', false);
+    public static readonly Gallery = new TransactionListPageType(2, 'Transaction Gallery', false);
 
     public static readonly Default = TransactionListPageType.List;
 
     public readonly type: number;
     public readonly name: string;
+    public readonly selectable: boolean;
 
-    private constructor(type: number, name: string) {
+    private constructor(type: number, name: string, selectable: boolean) {
         this.type = type;
         this.name = name;
+        this.selectable = selectable;
 
         TransactionListPageType.allInstances.push(this);
         TransactionListPageType.allInstancesByType[type] = this;
@@ -73,8 +78,21 @@ export class TransactionListPageType implements TypeAndName {
         return TransactionListPageType.allInstances;
     }
 
+    // The modes a user can actually choose. Use this for the mode selector; values() still
+    // contains the retired modes so old URLs can be recognised before being redirected.
+    public static selectableValues(): TransactionListPageType[] {
+        return TransactionListPageType.allInstances.filter(item => item.selectable);
+    }
+
     public static valueOf(type: number): TransactionListPageType | undefined {
         return TransactionListPageType.allInstancesByType[type];
+    }
+
+    // Maps a retired mode onto the mode that replaced it, so a bookmarked Calendar or Gallery URL
+    // opens the list rather than an empty view.
+    public static resolveSelectable(type: number): TransactionListPageType {
+        const pageType = TransactionListPageType.allInstancesByType[type];
+        return pageType && pageType.selectable ? pageType : TransactionListPageType.Default;
     }
 }
 

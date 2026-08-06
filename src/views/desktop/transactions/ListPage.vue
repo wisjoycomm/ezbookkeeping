@@ -5,7 +5,7 @@
                 <v-layout>
                     <v-navigation-drawer :permanent="alwaysShowNav" v-model="showNav">
                         <div class="mx-6 my-4">
-                            <btn-vertical-group :disabled="loading" :buttons="TransactionListPageType.values().map(item => {
+                            <btn-vertical-group :disabled="loading" :buttons="TransactionListPageType.selectableValues().map(item => {
                                 return {
                                     name: tt(item.name),
                                     value: item.type
@@ -1229,7 +1229,8 @@ function init(initProps: TransactionListProps): void {
     });
 
     if (initProps.initPageType) {
-        const type = TransactionListPageType.valueOf(parseInt(initProps.initPageType));
+        // A retired mode (Calendar or Gallery) from an old bookmark resolves to List.
+        const type = TransactionListPageType.resolveSelectable(parseInt(initProps.initPageType));
 
         if (type) {
             pageType.value = type.type;
