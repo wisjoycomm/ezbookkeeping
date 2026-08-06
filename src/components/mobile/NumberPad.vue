@@ -101,6 +101,9 @@ const props = defineProps<{
     currency?: string;
     flipNegative?: boolean;
     hint?: string;
+    // When the pad is rendered inline (rather than inside a sheet) the caller has its own save
+    // control, so the value must track every keypress instead of only the confirm button.
+    liveUpdate?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -465,6 +468,22 @@ function resetInput(): void {
 
 watch(() => props.flipNegative, (newValue) => {
     currentValue.value = getInitedStringValue(props.modelValue, newValue);
+});
+
+watch(currentValue, (newValue) => {
+    // While a pending × − + symbol is present the displayed value is only one operand, so it
+    // must not be published until confirm() resolves the formula.
+    if (!props.liveUpdate || currentSymbol.value) {
+        return;
+    }
+
+    let value: number = parseAmountFromWesternArabicNumerals(newValue);
+
+    if (props.flipNegative) {
+        value = -value;
+    }
+
+    emit('update:modelValue', value);
 });
 
 defineExpose({

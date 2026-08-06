@@ -174,7 +174,7 @@
             </f7-link>
             <!-- "homepage-add-button" must have the "dragenabled" class, otherwise the popover disappears immediately after the second long press -->
             <f7-link id="homepage-add-button" class="link dragenabled"
-                     href="/transaction/add" @taphold="openTransactionTemplatePopover">
+                     @click="showQuickAddTypeActions = true" @taphold="openTransactionTemplatePopover">
                 <f7-icon f7="plus_square" class="ebk-tarbar-big-icon"></f7-icon>
             </f7-link>
             <f7-link class="link" href="/statistic/transaction">
@@ -216,6 +216,22 @@
             </f7-list>
         </f7-popover>
 
+        <f7-actions v-model:opened="showQuickAddTypeActions">
+            <f7-actions-group>
+                <f7-actions-button @click="openQuickAdd(TransactionType.Expense)">{{ tt('Expense') }}</f7-actions-button>
+                <f7-actions-button @click="openQuickAdd(TransactionType.Income)">{{ tt('Income') }}</f7-actions-button>
+            </f7-actions-group>
+            <f7-actions-group>
+                <f7-actions-button bold @click="f7router.navigate('/transaction/add')">{{ tt('More Details') }}</f7-actions-button>
+                <f7-actions-button close>{{ tt('Cancel') }}</f7-actions-button>
+            </f7-actions-group>
+        </f7-actions>
+
+        <quick-add-sheet :transaction-type="quickAddTransactionType"
+                         v-model:show="showQuickAddSheet"
+                         @saved="reload()"
+                         @more-details="(query: string) => f7router.navigate(`/transaction/add?${query}`)"></quick-add-sheet>
+
         <a-i-image-recognition-sheet ref="aiImageRecognitionSheet"
                                      v-model:show="showAIReceiptImageRecognitionSheet"
                                      @recognition:change="onReceiptRecognitionChanged"/>
@@ -224,6 +240,7 @@
 
 <script setup lang="ts">
 import AIImageRecognitionSheet, { type AIImageRecognitionResult } from '@/components/mobile/AIImageRecognitionSheet.vue';
+import QuickAddSheet from '@/views/mobile/transactions/QuickAddSheet.vue';
 
 import { ref, computed, useTemplateRef } from 'vue';
 import type { Router } from 'framework7/types';
@@ -240,6 +257,7 @@ import { useOverviewStore } from '@/stores/overview.ts';
 
 import { DateRange } from '@/core/datetime.ts';
 import { TemplateType } from '@/core/template.ts';
+import { TransactionType } from '@/core/transaction.ts';
 import { TransactionTemplate } from '@/models/transaction_template.ts';
 
 import { isFunction } from '@/lib/common.ts';
@@ -279,6 +297,15 @@ const aiImageRecognitionSheet = useTemplateRef<AIImageRecognitionSheetType>('aiI
 const loading = ref<boolean>(true);
 const showTransactionTemplatePopover = ref<boolean>(false);
 const showAIReceiptImageRecognitionSheet = ref<boolean>(false);
+const showQuickAddTypeActions = ref<boolean>(false);
+const showQuickAddSheet = ref<boolean>(false);
+const quickAddTransactionType = ref<number>(TransactionType.Expense);
+
+function openQuickAdd(transactionType: number): void {
+    quickAddTransactionType.value = transactionType;
+    showQuickAddTypeActions.value = false;
+    showQuickAddSheet.value = true;
+}
 
 const allTransactionTemplates = computed<TransactionTemplate[]>(() => {
     const allTemplates = transactionTemplatesStore.allVisibleTemplates;
