@@ -1,25 +1,41 @@
 # Unified Transaction Calendar List Design
 
 **Date:** 2026-08-06
-**Status:** Approved
+**Status:** Approved, amended 2026-08-06 after owner review
 **Platforms:** Mobile and desktop
+
+## Amendment — read this first
+
+The original draft conflicted with two decisions the owner had already made. Both are resolved
+here, and the resolutions override anything later in this document that contradicts them:
+
+1. **Gallery stays.** The original said "remove Gallery from the visible transaction modes". The
+   owner uses receipt pictures, so Gallery remains in the mode selector. Only the separate
+   **Calendar** mode is absorbed into the list.
+2. **Spend and earn are separable, by filter rather than by tabs.** The original said "do not
+   split expense and income into tabs or separate lists". The owner wants the separation; hard
+   tabs, however, break date-scrolling, because "scroll to 15 August" is ambiguous across two
+   lists. The resolution is a **Tất cả / Chi / Thu filter toggle above one unified list**. The
+   list stays single and chronological, so the calendar keeps working, and the separation is one
+   tap away.
 
 ## Goal
 
 Make the transaction list the single place for reviewing day-to-day finances:
 
-- keep expense and income transactions together;
+- keep one unified chronological list, with a spend/earn filter toggle above it;
 - embed calendar navigation into the list instead of maintaining a separate Calendar mode;
-- remove Gallery from the visible transaction modes; and
+- keep Gallery as a mode; and
 - let the user define when their financial month begins.
 
-The result should make a particular day quick to reach without hiding the surrounding transactions.
+The result should make a particular day quick to reach without hiding the surrounding
+transactions.
 
 ## Selected approach
 
 Use one financial period at a time. A compact week strip remains above the mixed transaction list, and the period header expands a full calendar inline.
 
-This replaces the current List, Calendar, and Gallery mode selector. List becomes the only visible transaction view. The existing transaction details and editors continue to show attached pictures.
+This absorbs the current Calendar mode into List. The mode selector keeps **List** and **Gallery**. The existing transaction details and editors continue to show attached pictures.
 
 The alternatives rejected were a permanently expanded month, which consumes too much mobile space, and an on-demand calendar drawer, which makes date navigation harder to discover.
 
@@ -52,7 +68,8 @@ From top to bottom, both platforms show:
 1. A period header with previous/next controls, the starting-month name, the exact start/end dates, and a control to expand or collapse the calendar.
 2. Existing period totals, with expense and income shown separately as summaries only.
 3. A compact seven-day strip containing the selected date.
-4. One chronological transaction list containing both expense and income.
+4. A Tất cả / Chi / Thu filter toggle.
+5. One chronological transaction list containing both expense and income, filtered by the toggle.
 
 The expanded calendar represents the complete financial period, including dates from the following Gregorian month when required. Dates outside the active financial period may appear to complete a calendar week but are visually muted and are not selectable.
 
@@ -82,10 +99,27 @@ No backend endpoint or transaction model change is required.
 
 ## Gallery and existing routes
 
-- Remove Calendar and Gallery from the visible transaction mode selector.
+- Remove **Calendar** from the visible transaction mode selector; it is absorbed into the list.
+- **Keep Gallery** as a mode. The owner uses receipt pictures.
 - Do not delete transaction pictures or their detail/editor UI.
-- Preserve existing Calendar and Gallery route/query inputs as compatibility redirects into the unified list for old bookmarks.
-- Do not split expense and income into tabs or separate lists.
+- Preserve existing Calendar route/query inputs as compatibility redirects into the unified list
+  for old bookmarks.
+- Do not split expense and income into tabs or separate lists — use the filter toggle below.
+
+## Spend/earn filter toggle
+
+A three-state toggle sits above the list: **Tất cả / Chi / Thu**, defaulting to Tất cả.
+
+- It filters the rendered list in place. The loaded period data is unchanged, so switching is
+  instant and needs no request.
+- The period totals above it always show both Chi and Thu regardless of the toggle, so the toggle
+  never hides the fact that the other side exists.
+- The calendar and week strip continue to reflect the whole period, not the filtered subset —
+  otherwise date navigation would shift under the user when the filter changes.
+- Selecting a date while filtered scrolls to the first *matching* transaction on that date, or
+  shows the no-transactions marker when the date has none of the filtered type.
+- The toggle state belongs in the transaction-list query state alongside the period and selected
+  date, so refresh and shared URLs reproduce it.
 
 ## Settings
 
@@ -112,7 +146,7 @@ Changing the value recalculates the current period immediately. The view should 
 
 - Changing transaction editing, quick-add, categories, accounts, or backend data.
 - Removing picture attachments from transactions.
-- Adding spend/earn tabs.
+- Adding spend/earn tabs or separate lists (the filter toggle replaces them).
 - Adding per-account financial-month settings.
 - Adding new calendar or date dependencies.
 - Redesigning unrelated filters or navigation.
@@ -124,7 +158,8 @@ Automated checks should cover the financial-period boundary calculation, includi
 Manual checks on both mobile and desktop should confirm:
 
 - the unified list contains expense and income together;
-- Calendar and Gallery are absent from visible transaction modes;
+- Calendar is absent from the visible transaction modes and Gallery is still present;
+- the Tat ca / Chi / Thu toggle filters the list without changing the calendar or the totals;
 - the compact week strip and expanded period calendar select the same date;
 - selecting a populated date scrolls to its transaction group without filtering other dates;
 - selecting an empty date inserts and reaches the temporary marker;
